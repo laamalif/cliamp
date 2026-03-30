@@ -419,10 +419,10 @@ func main() {
 		fmt.Println(helpText)
 		return
 	case "version":
-		if version == "" {
+		if appmeta.Version() == "dev" {
 			fmt.Println("cliamp (dev build)")
 		} else {
-			fmt.Printf("cliamp %s\n", version)
+			fmt.Printf("cliamp %s\n", appmeta.Version())
 		}
 		return
 	case "upgrade":
