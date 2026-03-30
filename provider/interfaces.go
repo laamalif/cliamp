@@ -1,6 +1,7 @@
 package provider
 
 import (
+<<<<<<< ours
 	"context"
 	"time"
 
@@ -16,11 +17,20 @@ type Searcher interface {
 
 // ArtistBrowser is implemented by providers that support listing artists
 // and their albums.
+=======
+	"time"
+
+	"cliamp/playlist"
+)
+
+// ArtistBrowser is implemented by providers that can browse artists and their albums.
+>>>>>>> theirs
 type ArtistBrowser interface {
 	Artists() ([]ArtistInfo, error)
 	ArtistAlbums(artistID string) ([]AlbumInfo, error)
 }
 
+<<<<<<< ours
 // AlbumBrowser is implemented by providers that support paginated album
 // listing with configurable sort order.
 type AlbumBrowser interface {
@@ -105,4 +115,29 @@ type SectionedList interface {
 // connections) that should be released on shutdown.
 type Closer interface {
 	Close()
+=======
+// AlbumBrowser is implemented by providers that support a global album list.
+type AlbumBrowser interface {
+	AlbumList(sortType string, offset, size int) ([]AlbumInfo, error)
+	AlbumSortTypes() []SortType
+	DefaultAlbumSort() string
+}
+
+// AlbumSortSaver is implemented by providers that persist album sort changes.
+type AlbumSortSaver interface {
+	SaveAlbumSort(sortType string) error
+}
+
+// AlbumTrackLoader is implemented by providers that can load tracks for one album.
+type AlbumTrackLoader interface {
+	AlbumTracks(albumID string) ([]playlist.Track, error)
+}
+
+// PlaybackReporter is implemented by providers that accept now-playing and
+// playback-completion reports for tracks they originated.
+type PlaybackReporter interface {
+	CanReportPlayback(track playlist.Track) bool
+	ReportNowPlaying(track playlist.Track, position time.Duration, canSeek bool)
+	ReportScrobble(track playlist.Track, elapsed, duration time.Duration, canSeek bool)
+>>>>>>> theirs
 }

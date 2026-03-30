@@ -6,6 +6,11 @@ import (
 
 	tea "github.com/charmbracelet/bubbletea"
 
+<<<<<<< ours
+=======
+	"cliamp/external/radio"
+	"cliamp/external/spotify"
+>>>>>>> theirs
 	"cliamp/lyrics"
 	"cliamp/player"
 	"cliamp/playlist"
@@ -29,7 +34,7 @@ type tracksLoadedMsg []playlist.Track
 // the source (e.g. YouTube Radio) without re-scanning external state.
 type feedsLoadedMsg struct {
 	tracks   []playlist.Track
-	urls      []string // original source URLs that produced these tracks
+	urls     []string // original source URLs that produced these tracks
 	autoPlay bool     // whether to start playback automatically
 }
 
@@ -72,7 +77,11 @@ type ytdlSavedMsg struct {
 
 // — Navidrome browser message types —
 
+<<<<<<< ours
 // navArtistsLoadedMsg carries the full artist list from a provider.ArtistBrowser.
+=======
+// navArtistsLoadedMsg carries the full artist list from a provider browser.
+>>>>>>> theirs
 type navArtistsLoadedMsg []provider.ArtistInfo
 
 // navAlbumsLoadedMsg carries one page of albums and the fetch offset.
@@ -353,4 +362,3 @@ func createSpotPlaylistCmd(c provider.PlaylistCreator, w provider.PlaylistWriter
 		return spotCreatedMsg{name: name, err: err}
 	}
 }
-

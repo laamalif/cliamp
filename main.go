@@ -10,6 +10,7 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 
 	"cliamp/config"
+	"cliamp/external/jellyfin"
 	"cliamp/external/local"
 	"cliamp/external/navidrome"
 	"cliamp/external/plex"
@@ -19,9 +20,9 @@ import (
 	"cliamp/internal/resume"
 	"cliamp/luaplugin"
 	"cliamp/mpris"
-	"cliamp/pluginmgr"
 	"cliamp/player"
 	"cliamp/playlist"
+	"cliamp/pluginmgr"
 	"cliamp/resolve"
 	"cliamp/theme"
 	"cliamp/ui"
@@ -55,6 +56,10 @@ func run(overrides config.Overrides, positional []string) error {
 
 	if plexProv := plex.NewFromConfig(cfg.Plex); plexProv != nil {
 		providers = append(providers, ui.ProviderEntry{Key: "plex", Name: "Plex", Provider: plexProv})
+	}
+
+	if jellyProv := jellyfin.NewFromConfig(cfg.Jellyfin); jellyProv != nil {
+		providers = append(providers, ui.ProviderEntry{Key: "jellyfin", Name: "Jellyfin", Provider: jellyProv})
 	}
 
 	var spotifyProv *spotify.SpotifyProvider
@@ -198,7 +203,11 @@ func run(overrides config.Overrides, positional []string) error {
 		defer luaMgr.Close()
 	}
 
+<<<<<<< ours
 	m := ui.NewModel(p, pl, providers, defaultProvider, localProv, themes, cfg.Navidrome.BrowseSort, luaMgr)
+=======
+	m := ui.NewModel(p, pl, providers, defaultProvider, localProv, spotifyProv, themes, cfg.Navidrome, luaMgr)
+>>>>>>> theirs
 
 	// Wire Lua plugin state provider with read-only access to player/playlist.
 	if luaMgr != nil {
@@ -212,21 +221,21 @@ func run(overrides config.Overrides, positional []string) error {
 				}
 				return "playing"
 			},
-			Position:    func() float64 { return p.Position().Seconds() },
-			Duration:    func() float64 { return p.Duration().Seconds() },
-			Volume:      func() float64 { return p.Volume() },
-			Speed:       func() float64 { return p.Speed() },
-			Mono:        func() bool { return p.Mono() },
-			RepeatMode:  func() string { return pl.Repeat().String() },
-			Shuffle:     func() bool { return pl.Shuffled() },
-			EQBands:     func() [10]float64 { return p.EQBands() },
-			TrackTitle:  func() string { t, _ := pl.Current(); return t.Title },
-			TrackArtist: func() string { t, _ := pl.Current(); return t.Artist },
-			TrackAlbum:  func() string { t, _ := pl.Current(); return t.Album },
-			TrackGenre:  func() string { t, _ := pl.Current(); return t.Genre },
-			TrackYear:   func() int { t, _ := pl.Current(); return t.Year },
-			TrackNumber: func() int { t, _ := pl.Current(); return t.TrackNumber },
-			TrackPath:   func() string { t, _ := pl.Current(); return t.Path },
+			Position:      func() float64 { return p.Position().Seconds() },
+			Duration:      func() float64 { return p.Duration().Seconds() },
+			Volume:        func() float64 { return p.Volume() },
+			Speed:         func() float64 { return p.Speed() },
+			Mono:          func() bool { return p.Mono() },
+			RepeatMode:    func() string { return pl.Repeat().String() },
+			Shuffle:       func() bool { return pl.Shuffled() },
+			EQBands:       func() [10]float64 { return p.EQBands() },
+			TrackTitle:    func() string { t, _ := pl.Current(); return t.Title },
+			TrackArtist:   func() string { t, _ := pl.Current(); return t.Artist },
+			TrackAlbum:    func() string { t, _ := pl.Current(); return t.Album },
+			TrackGenre:    func() string { t, _ := pl.Current(); return t.Genre },
+			TrackYear:     func() int { t, _ := pl.Current(); return t.Year },
+			TrackNumber:   func() int { t, _ := pl.Current(); return t.TrackNumber },
+			TrackPath:     func() string { t, _ := pl.Current(); return t.Path },
 			TrackIsStream: func() bool { t, _ := pl.Current(); return t.Stream },
 			TrackDuration: func() int { t, _ := pl.Current(); return t.DurationSecs },
 			PlaylistCount: func() int { return pl.Len() },
@@ -285,8 +294,8 @@ func run(overrides config.Overrides, positional []string) error {
 			SetEQPreset: func(name string, bands *[10]float64) {
 				prog.Send(ui.SetEQPresetMsg{Name: name, Bands: bands})
 			},
-			Next:         func() { prog.Send(mpris.NextMsg{}) },
-			Prev:         func() { prog.Send(mpris.PrevMsg{}) },
+			Next: func() { prog.Send(mpris.NextMsg{}) },
+			Prev: func() { prog.Send(mpris.PrevMsg{}) },
 		})
 	}
 

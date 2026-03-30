@@ -40,7 +40,11 @@ func (m *Model) quit() tea.Cmd {
 
 // scrobbleCurrent fires a scrobble for the currently playing track if applicable.
 func (m *Model) scrobbleCurrent() {
+<<<<<<< ours
 	if track, idx := m.playlist.Current(); idx >= 0 {
+=======
+	if track, _ := m.playlist.Current(); m.findPlaybackReporter(track) != nil {
+>>>>>>> theirs
 		m.maybeScrobble(track, m.player.Position(), m.player.Duration())
 	}
 }
@@ -343,7 +347,7 @@ func (m *Model) handleKey(msg tea.KeyMsg) tea.Cmd {
 		if m.focus == focusEQ {
 			bands := m.player.EQBands()
 			m.player.SetEQBand(m.eqCursor, bands[m.eqCursor]+1)
-			m.eqPresetIdx = -1  // manual tweak → custom
+			m.eqPresetIdx = -1 // manual tweak → custom
 			m.eqCustomLabel = ""
 			m.saveEQ()
 		} else {
@@ -360,7 +364,7 @@ func (m *Model) handleKey(msg tea.KeyMsg) tea.Cmd {
 		if m.focus == focusEQ {
 			bands := m.player.EQBands()
 			m.player.SetEQBand(m.eqCursor, bands[m.eqCursor]-1)
-			m.eqPresetIdx = -1  // manual tweak → custom
+			m.eqPresetIdx = -1 // manual tweak → custom
 			m.eqCustomLabel = ""
 			m.saveEQ()
 		} else {

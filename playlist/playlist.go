@@ -38,6 +38,7 @@ type Track struct {
 	Genre        string
 	Year         int
 	TrackNumber  int
+<<<<<<< ours
 	Stream       bool   // true for HTTP/HTTPS URLs
 	Realtime     bool   // true for real-time/live streams (e.g. radio)
 	DurationSecs int    // known duration in seconds (0 = unknown)
@@ -48,6 +49,17 @@ type Track struct {
 }
 
 // Meta returns the value for a provider-specific metadata key, or "" if unset.
+=======
+	Stream       bool // true for HTTP/HTTPS URLs
+	Realtime     bool // true for real-time/live streams (e.g. radio)
+	DurationSecs int  // known duration in seconds (0 = unknown)
+
+	// ProviderMeta stores provider-specific metadata such as remote item IDs.
+	ProviderMeta map[string]string
+}
+
+// Meta returns one provider-specific metadata value or "" if unset.
+>>>>>>> theirs
 func (t Track) Meta(key string) string {
 	if t.ProviderMeta == nil {
 		return ""

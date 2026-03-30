@@ -250,12 +250,17 @@ type Model struct {
 	cachedDur  time.Duration
 	lastTickAt time.Time // wall time of previous tickMsg; used for tick delta
 
+<<<<<<< ours
+=======
+	navScrobbleEnabled bool
+>>>>>>> theirs
 }
 
 // NewModel creates a Model wired to the given player and playlist.
 // providers is the ordered list of available providers (Radio, Navidrome, Spotify).
 // defaultProvider is the config key of the provider to select initially.
 // localProv is an optional direct reference to the local provider for write ops.
+<<<<<<< ours
 // browseSortType seeds the initial album browse sort preference (empty = default).
 func NewModel(p *player.Player, pl *playlist.Playlist, providers []ProviderEntry, defaultProvider string, localProv playlist.Provider, themes []theme.Theme, browseSortType string, luaMgr *luaplugin.Manager) Model {
 	if browseSortType == "" {
@@ -274,6 +279,25 @@ func NewModel(p *player.Player, pl *playlist.Playlist, providers []ProviderEntry
 		providers:     providers,
 		navBrowser:    navBrowserState{sortType: browseSortType},
 		luaMgr:        luaMgr,
+=======
+// navCfg is currently used for Navidrome reporting preferences.
+func NewModel(p *player.Player, pl *playlist.Playlist, providers []ProviderEntry, defaultProvider string, localProv *local.Provider, spotifyProv *spotify.SpotifyProvider, themes []theme.Theme, navCfg config.NavidromeConfig, luaMgr *luaplugin.Manager) Model {
+	m := Model{
+		player:             p,
+		playlist:           pl,
+		vis:                NewVisualizer(float64(p.SampleRate())),
+		seekStepLarge:      30 * time.Second,
+		plVisible:          5,
+		eqPresetIdx:        -1, // custom until a preset is selected
+		themes:             themes,
+		themeIdx:           -1, // Default (ANSI)
+		localProvider:      localProv,
+		spotifyProvider:    spotifyProv,
+		providers:          providers,
+		navBrowser:         navBrowserState{},
+		navScrobbleEnabled: navCfg.ScrobbleEnabled(),
+		luaMgr:             luaMgr,
+>>>>>>> theirs
 	}
 	m.termTitle = initialTerminalTitleState()
 	// Select the default provider pill.
@@ -292,11 +316,15 @@ func NewModel(p *player.Player, pl *playlist.Playlist, providers []ProviderEntry
 	return m
 }
 
+<<<<<<< ours
 // findProviderWith returns the first registered provider that satisfies the
 // given capability check. This is used for cross-provider shortcuts like "N"
 // (browse) and "F" (search) which should work regardless of the active provider.
 func (m *Model) findProviderWith(check func(playlist.Provider) bool) playlist.Provider {
 	// Prefer the active provider if it matches.
+=======
+func (m *Model) findProviderWith(check func(playlist.Provider) bool) playlist.Provider {
+>>>>>>> theirs
 	if check(m.provider) {
 		return m.provider
 	}
@@ -308,6 +336,37 @@ func (m *Model) findProviderWith(check func(playlist.Provider) bool) playlist.Pr
 	return nil
 }
 
+<<<<<<< ours
+=======
+func (m *Model) findPlaybackReporter(track playlist.Track) provider.PlaybackReporter {
+	match := func(p playlist.Provider) provider.PlaybackReporter {
+		reporter, ok := p.(provider.PlaybackReporter)
+		if !ok || !reporter.CanReportPlayback(track) {
+			return nil
+		}
+		// Preserve the existing Navidrome opt-out behavior until reporting
+		// settings are generalized beyond the Navidrome config block.
+		if _, ok := p.(*navidrome.NavidromeClient); ok && !m.navScrobbleEnabled {
+			return nil
+		}
+		return reporter
+	}
+
+	if reporter := match(m.provider); reporter != nil {
+		return reporter
+	}
+	for _, pe := range m.providers {
+		if pe.Provider == nil {
+			continue
+		}
+		if reporter := match(pe.Provider); reporter != nil {
+			return reporter
+		}
+	}
+	return nil
+}
+
+>>>>>>> theirs
 // SetAutoPlay makes the player start playback immediately on Init.
 func (m *Model) SetAutoPlay(v bool) { m.autoPlay = v }
 
@@ -656,6 +715,7 @@ func (m *Model) flushPendingSpeedSave() {
 	m.saveSpeed()
 }
 
+<<<<<<< ours
 // fetchNavArtistAllTracksCmd first fetches the artist's album list, then fetches
 // all tracks across every album. This is used by the "By Artist" browse mode.
 // The provider must implement both ArtistBrowser and AlbumTrackLoader.
@@ -663,6 +723,14 @@ func (m *Model) fetchNavArtistAllTracksCmd(ab provider.ArtistBrowser, artistID s
 	loader, _ := m.navBrowser.prov.(provider.AlbumTrackLoader)
 	return func() tea.Msg {
 		albums, err := ab.ArtistAlbums(artistID)
+=======
+// fetchNavArtistAllTracksCmd first fetches the artist's albums, then all tracks
+// across each album. This is used by the "By Artist" browse mode.
+func (m *Model) fetchNavArtistAllTracksCmd(browser provider.ArtistBrowser, artistID string) tea.Cmd {
+	loader, _ := m.navBrowser.prov.(provider.AlbumTrackLoader)
+	return func() tea.Msg {
+		albums, err := browser.ArtistAlbums(artistID)
+>>>>>>> theirs
 		if err != nil {
 			return err
 		}
@@ -726,8 +794,11 @@ func (m *Model) navClearSearch() {
 	m.navBrowser.scroll = 0
 }
 
+<<<<<<< ours
 // findBrowseProvider returns the first provider that supports browsing
 // (ArtistBrowser or AlbumBrowser), preferring the active provider.
+=======
+>>>>>>> theirs
 func (m *Model) findBrowseProvider() playlist.Provider {
 	return m.findProviderWith(func(p playlist.Provider) bool {
 		if _, ok := p.(provider.ArtistBrowser); ok {
@@ -754,6 +825,13 @@ func (m *Model) openNavBrowserWith(prov playlist.Provider) {
 	m.navBrowser.searching = false
 	m.navBrowser.search = ""
 	m.navBrowser.searchIdx = nil
+	m.navBrowser.selArtist = provider.ArtistInfo{}
+	m.navBrowser.selAlbum = provider.AlbumInfo{}
+	if ab, ok := prov.(provider.AlbumBrowser); ok {
+		m.navBrowser.sortType = ab.DefaultAlbumSort()
+	} else {
+		m.navBrowser.sortType = ""
+	}
 }
 
 // Init starts the tick timer and requests the terminal size.
@@ -1950,7 +2028,12 @@ func (m *Model) lyricsSyncable() bool {
 		return false
 	}
 	// ICY radio streams: position counts from stream connect, not song start.
+<<<<<<< ours
 	// Provider streams with metadata (e.g. Navidrome) track position correctly.
+=======
+	// Plain HTTP streams without provider metadata often report position from
+	// stream connect time rather than track time, which breaks synced lyrics.
+>>>>>>> theirs
 	if track.Stream && len(track.ProviderMeta) == 0 {
 		return false
 	}
@@ -1983,12 +2066,17 @@ func (m *Model) updateSearch() {
 	}
 }
 
-// maybeScrobble fires a submission scrobble for the given track if all
+// maybeScrobble fires a playback-complete report for the given track if all
 // conditions are met:
+<<<<<<< ours
 //   - navClient is configured
 //   - scrobbling is enabled in config
 //   - a registered provider implements Scrobbler
 //   - elapsed is at least 50% of the track's known duration
+=======
+//   - a provider claims the track via provider metadata
+//   - the track reached at least 50% of its known duration
+>>>>>>> theirs
 //
 // The call is dispatched in a goroutine so it never blocks the UI.
 func (m *Model) maybeScrobble(track playlist.Track, elapsed, duration time.Duration) {
@@ -2005,8 +2093,13 @@ func (m *Model) maybeScrobble(track playlist.Track, elapsed, duration time.Durat
 		}
 	}
 
+<<<<<<< ours
 	scrobbler := m.findScrobbler()
 	if scrobbler == nil {
+=======
+	reporter := m.findPlaybackReporter(track)
+	if reporter == nil {
+>>>>>>> theirs
 		return
 	}
 	if duration <= 0 {
@@ -2019,7 +2112,12 @@ func (m *Model) maybeScrobble(track playlist.Track, elapsed, duration time.Durat
 	if elapsed < duration/2 {
 		return // less than 50% played
 	}
+<<<<<<< ours
 	go scrobbler.Scrobble(track, true)
+=======
+	canSeek := m.player.Seekable()
+	go reporter.ReportScrobble(track, elapsed, duration, canSeek)
+>>>>>>> theirs
 }
 
 // nowPlaying fires a now-playing notification for the given track if configured.
@@ -2028,6 +2126,7 @@ func (m *Model) nowPlaying(track playlist.Track) {
 		m.luaMgr.Emit(luaplugin.EventTrackChange, trackToMap(track))
 	}
 
+<<<<<<< ours
 	if scrobbler := m.findScrobbler(); scrobbler != nil {
 		go scrobbler.Scrobble(track, false)
 	}
@@ -2043,4 +2142,12 @@ func (m *Model) findScrobbler() provider.Scrobbler {
 		return nil
 	}
 	return prov.(provider.Scrobbler)
+=======
+	reporter := m.findPlaybackReporter(track)
+	if reporter == nil {
+		return
+	}
+	canSeek := m.player.Seekable()
+	go reporter.ReportNowPlaying(track, m.player.Position(), canSeek)
+>>>>>>> theirs
 }
