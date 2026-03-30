@@ -17,6 +17,7 @@ import (
 	"cliamp/external/radio"
 	"cliamp/external/spotify"
 	"cliamp/external/ytmusic"
+	"cliamp/internal/appmeta"
 	"cliamp/internal/resume"
 	"cliamp/luaplugin"
 	"cliamp/mpris"
@@ -411,6 +412,7 @@ func main() {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
+	appmeta.SetVersion(version)
 
 	switch action {
 	case "help":
