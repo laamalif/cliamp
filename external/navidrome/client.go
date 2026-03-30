@@ -19,21 +19,13 @@ import (
 	"cliamp/provider"
 )
 
-<<<<<<< ours
 // Compile-time interface checks.
-var (
-	_ provider.ArtistBrowser   = (*NavidromeClient)(nil)
-	_ provider.AlbumBrowser    = (*NavidromeClient)(nil)
-	_ provider.AlbumTrackLoader = (*NavidromeClient)(nil)
-	_ provider.Scrobbler       = (*NavidromeClient)(nil)
-=======
 var (
 	_ provider.ArtistBrowser    = (*NavidromeClient)(nil)
 	_ provider.AlbumBrowser     = (*NavidromeClient)(nil)
 	_ provider.AlbumTrackLoader = (*NavidromeClient)(nil)
 	_ provider.AlbumSortSaver   = (*NavidromeClient)(nil)
 	_ provider.PlaybackReporter = (*NavidromeClient)(nil)
->>>>>>> theirs
 )
 
 // httpClient is used for all Navidrome API calls with a finite timeout.
@@ -53,19 +45,6 @@ const (
 	SortByYear               = "byYear"
 	SortByGenre              = "byGenre"
 )
-
-<<<<<<< ours
-// SortTypes is the ordered list of sort modes used for cycling.
-var SortTypes = []string{
-	SortAlphabeticalByName,
-	SortAlphabeticalByArtist,
-	SortNewest,
-	SortRecent,
-	SortFrequent,
-	SortStarred,
-	SortByYear,
-	SortByGenre,
-}
 
 // IsSubsonicStreamURL reports whether path is a Subsonic stream or download
 // endpoint. Used by the player to select the buffered download pipeline.
@@ -98,30 +77,6 @@ var albumSortTypes = []provider.SortType{
 	{ID: SortByYear, Label: "By Year"},
 	{ID: SortByGenre, Label: "By Genre"},
 }
-
-// AlbumSortTypes returns the available sort options for album browsing.
-// Implements provider.AlbumBrowser.
-func (c *NavidromeClient) AlbumSortTypes() []provider.SortType {
-	return albumSortTypes
-}
-=======
-var albumSortTypes = []provider.SortType{
-	{ID: SortAlphabeticalByName, Label: "Alphabetical by Name"},
-	{ID: SortAlphabeticalByArtist, Label: "Alphabetical by Artist"},
-	{ID: SortNewest, Label: "Newest"},
-	{ID: SortRecent, Label: "Recently Played"},
-	{ID: SortFrequent, Label: "Most Played"},
-	{ID: SortStarred, Label: "Starred"},
-	{ID: SortByYear, Label: "By Year"},
-	{ID: SortByGenre, Label: "By Genre"},
-}
-
-// Artist represents a Navidrome/Subsonic artist entry.
-type Artist = provider.ArtistInfo
-
-// Album represents a Navidrome/Subsonic album entry.
-type Album = provider.AlbumInfo
->>>>>>> theirs
 
 // NavidromeClient implements playlist.Provider for a Navidrome/Subsonic server.
 type NavidromeClient struct {
@@ -520,14 +475,7 @@ func (c *NavidromeClient) ReportScrobble(track playlist.Track, _, _ time.Duratio
 // If submission is false, it registers a "now playing" notification only.
 // If submission is true, it records a full play (updates play count, last.fm, etc.).
 // The call is best-effort: errors are silently discarded.
-<<<<<<< ours
-// Scrobble reports playback to the Navidrome/Subsonic server.
-// Implements provider.Scrobbler.
-func (c *NavidromeClient) Scrobble(track playlist.Track, submission bool) {
-	id := track.Meta(provider.MetaNavidromeID)
-=======
 func (c *NavidromeClient) scrobble(id string, submission bool) {
->>>>>>> theirs
 	if id == "" {
 		return
 	}
