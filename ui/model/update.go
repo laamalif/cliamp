@@ -8,6 +8,7 @@ import (
 
 	tea "github.com/charmbracelet/bubbletea"
 
+	"cliamp/config"
 	"cliamp/mpris"
 	"cliamp/playlist"
 	"cliamp/provider"
@@ -560,6 +561,27 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.provSignIn = false
 		m.provLoading = true
 		return m, fetchPlaylistsCmd(m.provider)
+
+	case devicesListedMsg:
+		m.devicePicker.loading = false
+		if msg.err != nil {
+			m.status.Showf(statusTTLDefault, "Device list failed: %s", msg.err)
+			m.devicePicker.visible = false
+		} else {
+			m.devicePicker.devices = msg.devices
+		}
+		return m, nil
+
+	case deviceSwitchedMsg:
+		if msg.err != nil {
+			m.status.Showf(statusTTLDefault, "Switch failed: %s", msg.err)
+		} else {
+			m.status.Showf(statusTTLDefault, "Audio output: %s", msg.name)
+			_ = config.Save("audio_device", msg.name)
+		}
+		// Invalidate cached list so the next open refreshes Active markers.
+		m.devicePicker.devices = nil
+		return m, nil
 
 	case mpris.InitMsg:
 		m.mpris = msg.Svc
